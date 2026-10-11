@@ -1,0 +1,7 @@
+#include "Shared.xcconfig"
+
+// Production-адрес API ещё не утверждён (backend: план миграции, этап E9).
+// Пока значение пустое, сетевые сервисы отключены, а приложение работает локально.
+MP_API_BASE_URL =
+
+#include? "Local.xcconfig"

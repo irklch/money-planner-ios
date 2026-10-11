@@ -1,0 +1,8 @@
+// Общие настройки окружения приложения MoneyPlanner.
+// Значения попадают в Info.plist (Configuration/MoneyPlanner-Info.plist) и читаются AppConfiguration.
+//
+// MP_API_BASE_URL — origin бэкенда без /v1 (версия входит в путь endpoint).
+// В xcconfig `//` начинает комментарий, поэтому схема пишется как `https:/$()/host`.
+// Локальное переопределение — Configuration/Local.xcconfig (в .gitignore), см. README.
+
+MP_API_BASE_URL =
