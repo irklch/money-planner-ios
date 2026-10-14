@@ -1,3 +1,7 @@
+// AppTypography.swift
+// Семантические роли текста: шрифт и цвет по умолчанию для каждой роли.
+
+// SwiftUI нужен для Font, Color и модификатора View.
 import SwiftUI
 
 /// Семантические роли текста.
@@ -19,30 +23,32 @@ enum AppTextStyle: CaseIterable {
     /// Текст кнопки.
     case button
 
+    /// Шрифт роли: системный text style, начертание и дизайн.
     var font: Font {
-        switch self {
-        case .screenTitle: .system(.largeTitle, design: .default, weight: .bold)
-        case .sectionTitle: .system(.title3, design: .default, weight: .semibold)
-        case .body: .system(.body, design: .default, weight: .regular)
-        case .caption: .system(.footnote, design: .default, weight: .regular)
-        case .amount: .system(.title2, design: .rounded, weight: .semibold).monospacedDigit()
-        case .button: .system(.body, design: .default, weight: .semibold)
+        switch self { // Выбираем шрифт по роли.
+        case .screenTitle: .system(.largeTitle, design: .default, weight: .bold) // Крупный жирный заголовок.
+        case .sectionTitle: .system(.title3, design: .default, weight: .semibold) // Полужирный заголовок секции.
+        case .body: .system(.body, design: .default, weight: .regular) // Обычный основной текст.
+        case .caption: .system(.footnote, design: .default, weight: .regular) // Мелкий текст подписи.
+        case .amount: .system(.title2, design: .rounded, weight: .semibold).monospacedDigit() // Скруглённые цифры одинаковой ширины для сумм.
+        case .button: .system(.body, design: .default, weight: .semibold) // Полужирный текст кнопки.
         }
     }
 
     /// Цвет по умолчанию для роли.
     var color: Color {
-        switch self {
-        case .caption: AppColor.textSecondary
-        case .screenTitle, .sectionTitle, .body, .amount: AppColor.textPrimary
-        case .button: AppColor.accent
+        switch self { // Выбираем цвет по роли.
+        case .caption: AppColor.textSecondary // Подписи — вторичным цветом.
+        case .screenTitle, .sectionTitle, .body, .amount: AppColor.textPrimary // Основной текст и заголовки — основным цветом.
+        case .button: AppColor.accent // Кнопки — акцентным цветом.
         }
     }
 }
 
+/// Применение ролей текста к любому View.
 extension View {
     /// Применяет шрифт и цвет семантической роли текста.
     func textStyle(_ style: AppTextStyle) -> some View {
-        font(style.font).foregroundStyle(style.color)
+        font(style.font).foregroundStyle(style.color) // Задаём шрифт роли и её цвет по умолчанию.
     }
 }
