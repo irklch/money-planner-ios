@@ -1,41 +1,52 @@
-//
-//  MoneyPlannerUITests.swift
-//  MoneyPlannerUITests
-//
-//  Created by Ирина Кольчугина on 11.10.2026.
-//
-
 import XCTest
 
 final class MoneyPlannerUITests: XCTestCase {
-
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-
-        // In UI tests it is usually best to stop immediately when a failure occurs.
         continueAfterFailure = false
-
-        // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
     }
 
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
-
+    /// Приложение запускается без сети и с временной БД и показывает RootView.
     @MainActor
-    func testExample() throws {
-        // UI tests must launch the application that they test.
-        let app = XCUIApplication()
+    func testLaunchShowsRootViewWithoutNetwork() throws {
+        let app = XCUIApplication.makeForUITesting()
         app.launch()
 
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+        XCTAssertTrue(app.navigationBars["Проверка запуска"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["Хранилище готово"].exists)
+        // В режиме UI-тестов сеть отключена: проверка сервера недоступна.
+        XCTAssertTrue(app.staticTexts["Адрес сервера не настроен"].exists)
+        XCTAssertFalse(app.buttons["launchCheck.checkServer"].isEnabled)
+    }
+
+    /// RootView отображается при максимальном размере Dynamic Type.
+    @MainActor
+    func testLaunchWithAccessibilityTextSize() throws {
+        let app = XCUIApplication.makeForUITesting()
+        app.launchArguments += ["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
+        app.launch()
+
+        XCTAssertTrue(app.staticTexts["Хранилище готово"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["Хранилище готово"].isHittable)
+
+        let attachment = XCTAttachment(screenshot: app.screenshot())
+        attachment.name = "RootView AX5"
+        attachment.lifetime = .keepAlways
+        add(attachment)
     }
 
     @MainActor
     func testLaunchPerformance() throws {
-        // This measures how long it takes to launch your application.
         measure(metrics: [XCTApplicationLaunchMetric()]) {
-            XCUIApplication().launch()
+            XCUIApplication.makeForUITesting().launch()
         }
+    }
+}
+
+extension XCUIApplication {
+    /// Запуск в режиме UI-тестов: временная БД, без сети, русская локаль.
+    static func makeForUITesting() -> XCUIApplication {
+        let app = XCUIApplication()
+        app.launchArguments += ["--ui-testing", "-AppleLanguages", "(ru)", "-AppleLocale", "ru_RU"]
+        return app
     }
 }

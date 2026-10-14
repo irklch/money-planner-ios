@@ -1,0 +1,2 @@
+// Скопируйте в Configuration/Local.xcconfig (файл в .gitignore) и укажите свой адрес.
+// MP_API_BASE_URL = https:/$()/api.staging.example

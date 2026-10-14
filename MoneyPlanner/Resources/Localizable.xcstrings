@@ -1,0 +1,249 @@
+{
+  "sourceLanguage": "ru",
+  "strings": {
+    "action.retry": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Повторить"
+          }
+        }
+      }
+    },
+    "error.noConnection.message": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Проверьте подключение к интернету и повторите попытку."
+          }
+        }
+      }
+    },
+    "error.noConnection.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нет соединения"
+          }
+        }
+      }
+    },
+    "error.serviceUnavailable.message": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Попробуйте ещё раз через несколько минут."
+          }
+        }
+      }
+    },
+    "error.serviceUnavailable.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сервис временно недоступен"
+          }
+        }
+      }
+    },
+    "error.storage.message": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Данные на устройстве не удалены. Повторите попытку или перезапустите приложение."
+          }
+        }
+      }
+    },
+    "error.storage.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удалось открыть данные"
+          }
+        }
+      }
+    },
+    "error.unexpected.message": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Повторите попытку. Если ошибка повторится, обновите приложение."
+          }
+        }
+      }
+    },
+    "error.unexpected.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Что-то пошло не так"
+          }
+        }
+      }
+    },
+    "launchCheck.appVersion": {
+      "comment": "Подпись с версией приложения: %1$@ — версия, %2$@ — номер сборки.",
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Версия %1$@ (%2$@)"
+          }
+        }
+      }
+    },
+    "launchCheck.server.available": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сервер доступен"
+          }
+        }
+      }
+    },
+    "launchCheck.server.checkAction": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Проверить соединение"
+          }
+        }
+      }
+    },
+    "launchCheck.server.checking": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Проверяем соединение…"
+          }
+        }
+      }
+    },
+    "launchCheck.server.degraded": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сервер отвечает с ошибкой"
+          }
+        }
+      }
+    },
+    "launchCheck.server.idle": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Соединение не проверялось"
+          }
+        }
+      }
+    },
+    "launchCheck.server.notConfigured": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Адрес сервера не настроен"
+          }
+        }
+      }
+    },
+    "launchCheck.server.section": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сервер"
+          }
+        }
+      }
+    },
+    "launchCheck.settings.createdAt": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Первый запуск"
+          }
+        }
+      }
+    },
+    "launchCheck.storage.failed": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удалось прочитать настройки"
+          }
+        }
+      }
+    },
+    "launchCheck.storage.ready": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Хранилище готово"
+          }
+        }
+      }
+    },
+    "launchCheck.storage.section": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Локальные данные"
+          }
+        }
+      }
+    },
+    "launchCheck.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Проверка запуска"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

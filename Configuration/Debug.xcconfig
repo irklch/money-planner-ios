@@ -1,0 +1,7 @@
+#include "Shared.xcconfig"
+
+// Локальный бэкенд из money-planner-backend: `docker compose up --build api`.
+// ATS не требует исключений: localhost — неквалифицированное имя хоста.
+MP_API_BASE_URL = http:/$()/localhost:8000
+
+#include? "Local.xcconfig"
