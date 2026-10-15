@@ -1,19 +1,23 @@
+// AppMetrics.swift
+// Шкалы отступов, радиусов, размеров иконок и стандартных размеров элементов.
+
+// CoreGraphics нужен для типа CGFloat.
 import CoreGraphics
 
 /// Шкала отступов. Используется для padding и spacing вместо чисел в экранах.
 /// Значения предварительные, до утверждения макета в Figma.
 enum AppSpacing {
-    /// 4 pt
+    /// 4 pt — минимальный зазор между связанными элементами.
     static let xxSmall: CGFloat = 4
-    /// 8 pt
+    /// 8 pt — зазор внутри компактных групп.
     static let xSmall: CGFloat = 8
-    /// 12 pt
+    /// 12 pt — зазор между элементами строки.
     static let small: CGFloat = 12
     /// 16 pt — стандартный внешний отступ экрана.
     static let medium: CGFloat = 16
-    /// 24 pt
+    /// 24 pt — отступ между блоками.
     static let large: CGFloat = 24
-    /// 32 pt
+    /// 32 pt — отступ между крупными секциями.
     static let xLarge: CGFloat = 32
 }
 
@@ -31,7 +35,7 @@ enum AppRadius {
 enum AppIconSize {
     /// 20 pt — иконка в строке списка.
     static let small: CGFloat = 20
-    /// 28 pt
+    /// 28 pt — иконка в заголовке блока.
     static let medium: CGFloat = 28
     /// 48 pt — иконка состояния (ошибка, пустой экран).
     static let large: CGFloat = 48

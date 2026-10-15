@@ -15,6 +15,7 @@ struct LaunchCheckViewModelTests {
         return LaunchCheckViewModel(
             configuration: AppConfiguration(apiBaseURL: nil, appVersion: "1.0", buildNumber: "1"),
             settingsStore: AppSettingsRepository(container: container),
+            ledgerSummary: LedgerStore(container: container), // Хранилище данных поверх той же временной БД.
             healthService: health
         )
     }
@@ -33,6 +34,14 @@ struct LaunchCheckViewModelTests {
             return
         }
         #expect(settings.hasCompletedOnboarding == false)
+    }
+
+    /// Подготовка хранилища создаёт 12 системных категорий и показывает сводку.
+    @Test func preparesLedgerWithSystemCategories() async throws {
+        // ViewModel без сети.
+        let model = try makeModel(health: nil)
+        await model.loadLedger() // Подготовка хранилища.
+        #expect(model.ledger == .ready(LedgerSummary(activeCategoryCount: SystemCategory.allCases.count, expenseCount: 0))) // 12 категорий, расходов нет.
     }
 
     @Test(arguments: [
