@@ -13,6 +13,8 @@ final class MoneyPlannerUITests: XCTestCase {
 
         XCTAssertTrue(app.navigationBars["Проверка запуска"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.staticTexts["Хранилище готово"].exists)
+        // Хранилище расходов подготовлено: 12 системных категорий из реестра.
+        XCTAssertTrue(app.staticTexts["Категории: 12"].waitForExistence(timeout: 10))
         // В режиме UI-тестов сеть отключена: проверка сервера недоступна.
         XCTAssertTrue(app.staticTexts["Адрес сервера не настроен"].exists)
         XCTAssertFalse(app.buttons["launchCheck.checkServer"].isEnabled)

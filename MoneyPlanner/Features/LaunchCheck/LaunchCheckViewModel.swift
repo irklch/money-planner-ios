@@ -19,6 +19,16 @@ final class LaunchCheckViewModel {
         case failed
     }
 
+    /// Состояние подготовки хранилища расходов и категорий.
+    enum LedgerState: Equatable {
+        /// Хранилище ещё готовится.
+        case loading
+        /// Системные категории на месте; сводка получена.
+        case ready(LedgerSummary)
+        /// Подготовить хранилище не удалось.
+        case failed
+    }
+
     /// Состояние проверки сервера.
     enum ServerState: Equatable {
         /// Адрес API не задан или сеть отключена режимом запуска.
@@ -47,6 +57,8 @@ final class LaunchCheckViewModel {
 
     /// Состояние локальных настроек для экрана.
     private(set) var storage: StorageState = .loading
+    /// Состояние хранилища расходов и категорий для экрана.
+    private(set) var ledger: LedgerState = .loading
     /// Состояние проверки сервера для экрана.
     private(set) var server: ServerState
     /// Версия приложения для подписи.
@@ -56,6 +68,8 @@ final class LaunchCheckViewModel {
 
     /// Хранилище настроек.
     private let settingsStore: any AppSettingsStoring
+    /// Подготовка и сводка хранилища расходов и категорий.
+    private let ledgerSummary: any LedgerSummaryProviding
     /// Сервис проверки сервера; `nil`, если сеть недоступна.
     private let healthService: (any HealthServicing)?
 
@@ -63,11 +77,13 @@ final class LaunchCheckViewModel {
     init(
         configuration: AppConfiguration, // Источник версии приложения.
         settingsStore: any AppSettingsStoring, // Хранилище настроек.
+        ledgerSummary: any LedgerSummaryProviding, // Сводка хранилища расходов и категорий.
         healthService: (any HealthServicing)? // Сервис health-check или nil.
     ) {
         self.appVersion = configuration.appVersion // Версия для подписи.
         self.buildNumber = configuration.buildNumber // Номер сборки для подписи.
         self.settingsStore = settingsStore // Сохраняем хранилище.
+        self.ledgerSummary = ledgerSummary // Сохраняем сводку хранилища.
         self.healthService = healthService // Сохраняем сервис.
         self.server = healthService == nil ? .notConfigured : .idle // Без сервиса проверка недоступна.
     }
@@ -78,6 +94,15 @@ final class LaunchCheckViewModel {
             storage = .ready(try settingsStore.load()) // Показываем прочитанные настройки.
         } catch {
             storage = .failed // Показываем ошибку чтения.
+        }
+    }
+
+    /// Готовит хранилище расходов и категорий (системные категории) и читает сводку.
+    func loadLedger() async {
+        do {
+            ledger = .ready(try await ledgerSummary.prepare()) // Показываем число категорий.
+        } catch {
+            ledger = .failed // Показываем ошибку хранилища.
         }
     }
 

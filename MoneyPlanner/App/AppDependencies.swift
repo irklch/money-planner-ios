@@ -14,6 +14,8 @@ final class AppDependencies {
     let modelContainer: ModelContainer
     /// Хранилище настроек приложения.
     let settingsStore: any AppSettingsStoring
+    /// Хранилище расходов, категорий и отметок дня (один актор на контейнер).
+    let ledger: LedgerStore
     /// `nil`, если адрес API не настроен или сеть запрещена режимом запуска.
     let healthService: (any HealthServicing)?
 
@@ -22,11 +24,13 @@ final class AppDependencies {
         configuration: AppConfiguration, // Конфигурация окружения.
         modelContainer: ModelContainer, // Контейнер БД.
         settingsStore: any AppSettingsStoring, // Хранилище настроек.
+        ledger: LedgerStore, // Хранилище расходов и категорий.
         healthService: (any HealthServicing)? // Сервис health-check или nil.
     ) {
         self.configuration = configuration // Сохраняем конфигурацию.
         self.modelContainer = modelContainer // Сохраняем контейнер БД.
         self.settingsStore = settingsStore // Сохраняем хранилище настроек.
+        self.ledger = ledger // Сохраняем хранилище расходов и категорий.
         self.healthService = healthService // Сохраняем сервис health-check.
     }
 
@@ -46,7 +50,15 @@ final class AppDependencies {
             configuration: configuration, // Конфигурация окружения.
             modelContainer: container, // Выбранный контейнер БД.
             settingsStore: AppSettingsRepository(container: container), // Репозиторий настроек поверх контейнера.
+            ledger: LedgerStore(container: container), // Единственный актор данных поверх того же контейнера.
             healthService: healthService // Сервис или nil.
         )
     }
+
+    /// Категории для ViewModel.
+    var categoryRepository: any CategoryRepository { ledger } // Тот же актор, узкий протокол.
+    /// Расходы для ViewModel.
+    var expenseRepository: any ExpenseRepository { ledger } // Тот же актор, узкий протокол.
+    /// Отметки дня для ViewModel.
+    var dayMarkRepository: any DayMarkRepository { ledger } // Тот же актор, узкий протокол.
 }

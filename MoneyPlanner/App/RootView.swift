@@ -23,6 +23,7 @@ struct RootView: View {
         _launchCheckModel = State(initialValue: LaunchCheckViewModel( // ViewModel создаётся один раз.
             configuration: dependencies.configuration, // Версия приложения для подписи.
             settingsStore: dependencies.settingsStore, // Хранилище настроек.
+            ledgerSummary: dependencies.ledger, // Сводка локального хранилища.
             healthService: dependencies.healthService // Сервис health-check или nil.
         ))
     }
@@ -58,6 +59,7 @@ extension AppDependencies {
             configuration: AppConfiguration(apiBaseURL: nil, appVersion: "1.0", buildNumber: "1"), // Без адреса API.
             modelContainer: container, // Временная БД.
             settingsStore: AppSettingsRepository(container: container), // Репозиторий поверх временной БД.
+            ledger: LedgerStore(container: container), // Хранилище данных поверх временной БД.
             healthService: PreviewHealthService(result: health) // Сервис с заранее заданным ответом.
         )
     }

@@ -17,6 +17,7 @@ struct LaunchCheckView: View {
         .navigationTitle(Text(.launchCheckTitle))
         .task {
             model.loadSettings()
+            await model.loadLedger() // Готовим хранилище расходов и категорий.
         }
         .task(id: serverCheckRequest) {
             guard serverCheckRequest > 0 else { return }
@@ -40,6 +41,16 @@ struct LaunchCheckView: View {
                 } label: {
                     Text(.launchCheckSettingsCreatedAt).textStyle(.body)
                 }
+            case .failed:
+                StatusRow(icon: .failure, tint: AppColor.error, title: .launchCheckStorageFailed)
+            }
+            switch model.ledger { // Состояние хранилища расходов и категорий.
+            case .loading:
+                ProgressView()
+            case .ready(let summary):
+                Text(.launchCheckCategoriesCount(summary.activeCategoryCount)) // Число доступных категорий — признак успешной инициализации.
+                    .textStyle(.body)
+                    .accessibilityIdentifier("launchCheck.categories") // Идентификатор для UI-тестов.
             case .failed:
                 StatusRow(icon: .failure, tint: AppColor.error, title: .launchCheckStorageFailed)
             }
@@ -141,6 +152,7 @@ private struct ServerFailureRow: View {
         LaunchCheckView(model: LaunchCheckViewModel(
             configuration: AppDependencies.preview().configuration,
             settingsStore: AppDependencies.preview().settingsStore,
+            ledgerSummary: AppDependencies.preview().ledger, // Хранилище временной БД для preview.
             healthService: PreviewHealthService(result: .success(.available))
         ))
     }
@@ -151,6 +163,7 @@ private struct ServerFailureRow: View {
         LaunchCheckView(model: LaunchCheckViewModel(
             configuration: AppDependencies.preview().configuration,
             settingsStore: AppDependencies.preview().settingsStore,
+            ledgerSummary: AppDependencies.preview().ledger, // Хранилище временной БД для preview.
             healthService: PreviewHealthService(result: .failure(.transport(.notConnectedToInternet)))
         ))
     }

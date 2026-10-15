@@ -1,5 +1,5 @@
 // SchemaV1.swift
-// Первая версия локальной схемы SwiftData и план миграций.
+// Первая версия локальной схемы SwiftData. Заморожена: изменения — только в следующих версиях.
 
 // Foundation нужен для Date.
 import Foundation
@@ -45,21 +45,5 @@ nonisolated enum SchemaV1: VersionedSchema {
             self.createdAt = now // Время создания.
             self.updatedAt = now // При создании время изменения совпадает со временем создания.
         }
-    }
-}
-
-/// Текущие версии моделей: код приложения ссылается на них без номера схемы.
-typealias AppSettings = SchemaV1.AppSettings
-
-/// План миграций локальной БД. Пока одна версия и нет этапов.
-nonisolated enum AppMigrationPlan: SchemaMigrationPlan {
-    /// Все версии схемы по порядку.
-    static var schemas: [any VersionedSchema.Type] {
-        [SchemaV1.self] // Единственная версия.
-    }
-
-    /// Этапы миграции между версиями.
-    static var stages: [MigrationStage] {
-        [] // Этапов нет, пока есть только V1.
     }
 }

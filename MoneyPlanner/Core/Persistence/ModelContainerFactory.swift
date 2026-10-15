@@ -11,7 +11,7 @@ import SwiftData
 /// CloudKit отключён явно: синхронизация идёт через собственный бэкенд.
 nonisolated enum ModelContainerFactory {
     /// Текущая версионированная схема БД.
-    static let schema = Schema(versionedSchema: SchemaV1.self)
+    static let schema = Schema(versionedSchema: SchemaV2.self)
 
     /// Расположение пользовательской БД.
     static var defaultStoreURL: URL {
