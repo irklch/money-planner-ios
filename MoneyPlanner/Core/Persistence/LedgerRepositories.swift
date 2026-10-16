@@ -43,7 +43,22 @@ protocol DayMarkRepository: Sendable {
     func setDayMarked(_ isMarked: Bool, on date: CalendarDate) async throws -> DayMarkSnapshot
 }
 
-/// Подготовка локального хранилища и сводка для временного экрана запуска.
+/// Сводка расходов за период для главного экрана и экрана категории.
+protocol ExpenseOverviewProviding: Sendable {
+    /// Сводка неудалённых расходов за период (границы включительно), при необходимости — одной категории.
+    ///
+    /// Итог, категории, полоса и история посчитаны из одного набора расходов. Архивные категории
+    /// участвуют, расходы без категории на устройстве попадают в «Без категории».
+    func overview(of period: ClosedRange<CalendarDate>, categoryID: UUID?) async throws -> ExpenseOverview
+}
+
+/// Оповещения об изменении локальных данных.
+protocol LedgerChangeObserving: Sendable {
+    /// Поток событий «данные изменились»; подписка живёт, пока не отменена задача-подписчик.
+    func changes() -> AsyncStream<Void>
+}
+
+/// Подготовка локального хранилища и сводка его содержимого.
 protocol LedgerSummaryProviding: Sendable {
     /// Создаёт недостающие системные категории и возвращает сводку.
     func prepare() async throws -> LedgerSummary

@@ -80,7 +80,7 @@ struct AppSettingsRepositoryTests {
     }
 
     /// Процесс unit-тестов не открывает пользовательскую БД и не создаёт сетевых сервисов.
-    @Test func testProcessNeverUsesUserStore() throws {
+    @Test func testProcessNeverUsesUserStore() async throws {
         // Режим запуска текущего процесса.
         let mode = LaunchMode.detect()
 
@@ -89,7 +89,7 @@ struct AppSettingsRepositoryTests {
         #expect(mode.allowsNetwork == false)
 
         // Зависимости, собранные так же, как при запуске приложения.
-        let dependencies = try AppDependencies.make(
+        let dependencies = try await AppDependencies.make(
             mode: mode,
             configuration: AppConfiguration(apiBaseURL: URL(string: "https://example.test"), appVersion: "1", buildNumber: "1")
         )

@@ -12,6 +12,66 @@
         }
       }
     },
+    "category.footer.changePeriod": {
+      "comment": "%@ — подпись капсулы выбора периода.",
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сменить период — «%@» вверху."
+          }
+        }
+      }
+    },
+    "category.footer.days": {
+      "comment": "Подпись под историей категории: %lld — число дней.",
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Это все записи категории за %lld день."
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Это все записи категории за %lld дня."
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Это все записи категории за %lld дней."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Это все записи категории за %lld дня."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "category.footer.month": {
+      "comment": "Подпись под историей категории: %@ — месяц строчными.",
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Это все записи категории за %@."
+          }
+        }
+      }
+    },
     "category.system.beauty": {
       "comment": "Название системной категории «beauty» из реестра contract/system-categories.json.",
       "extractionState": "manual",
@@ -156,6 +216,102 @@
         }
       }
     },
+    "category.unknown": {
+      "comment": "Плейсхолдер категории, которой нет на устройстве.",
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Без категории"
+          }
+        }
+      }
+    },
+    "empty.choosePeriod": {
+      "comment": "Кнопка пустого состояния: открывает выбор периода.",
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выбрать период"
+          }
+        }
+      }
+    },
+    "empty.otherPeriod": {
+      "comment": "Пустой период, расходы есть в других периодах.",
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выберите другой период."
+          }
+        }
+      }
+    },
+    "empty.since": {
+      "comment": "Пустой период, расходы есть позже: %@ — дата первого расхода («1 сентября»).",
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Расходы есть с %@. Выберите другой период."
+          }
+        }
+      }
+    },
+    "empty.title.days": {
+      "comment": "Пустой скользящий период: %lld — число дней.",
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Нет расходов за %lld день"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Нет расходов за %lld дня"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Нет расходов за %lld дней"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Нет расходов за %lld дня"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "empty.title.month": {
+      "comment": "Пустой период: %@ — месяц строчными («август»).",
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нет расходов за %@"
+          }
+        }
+      }
+    },
     "error.noConnection.message": {
       "extractionState": "manual",
       "localizations": {
@@ -174,6 +330,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Нет соединения"
+          }
+        }
+      }
+    },
+    "error.overview.message": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Данные на устройстве не изменились. Повторите попытку."
+          }
+        }
+      }
+    },
+    "error.overview.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удалось загрузить расходы"
           }
         }
       }
@@ -244,158 +422,270 @@
         }
       }
     },
-    "launchCheck.appVersion": {
-      "comment": "Подпись с версией приложения: %1$@ — версия, %2$@ — номер сборки.",
+    "history.dayHeader": {
+      "comment": "Заголовок дня в истории: %1$@ — день и месяц («25 сентября»), %2$@ — день недели («чт»).",
       "extractionState": "manual",
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Версия %1$@ (%2$@)"
+            "value": "%1$@, %2$@"
           }
         }
       }
     },
-    "launchCheck.categories.count": {
-      "comment": "Число категорий, доступных для новых расходов: %lld — количество.",
+    "history.row.hint": {
       "extractionState": "manual",
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Категории: %lld"
+            "value": "Открывает расходы категории за период"
           }
         }
       }
     },
-    "launchCheck.server.available": {
+    "history.title.days": {
+      "comment": "Заголовок истории скользящего периода: %lld — число дней.",
       "extractionState": "manual",
       "localizations": {
         "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Сервер доступен"
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "История · %lld день"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "История · %lld дня"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "История · %lld дней"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "История · %lld дня"
+                }
+              }
+            }
           }
         }
       }
     },
-    "launchCheck.server.checkAction": {
+    "history.title.month": {
+      "comment": "Заголовок истории: %@ — месяц строчными («сентябрь»).",
       "extractionState": "manual",
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Проверить соединение"
+            "value": "История · %@"
           }
         }
       }
     },
-    "launchCheck.server.checking": {
+    "home.categories.collapse": {
+      "comment": "Строка, сворачивающая полный список категорий.",
       "extractionState": "manual",
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Проверяем соединение…"
+            "value": "Свернуть"
           }
         }
       }
     },
-    "launchCheck.server.degraded": {
+    "home.categories.showAll": {
+      "comment": "Строка, раскрывающая полный список категорий на месте.",
       "extractionState": "manual",
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Сервер отвечает с ошибкой"
+            "value": "Все категории"
           }
         }
       }
     },
-    "launchCheck.server.idle": {
+    "home.categories.showAll.hint": {
       "extractionState": "manual",
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Соединение не проверялось"
+            "value": "Показывает все категории на этом экране"
           }
         }
       }
     },
-    "launchCheck.server.notConfigured": {
+    "home.distribution.accessibility": {
       "extractionState": "manual",
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Адрес сервера не настроен"
+            "value": "Распределение расходов по категориям"
           }
         }
       }
     },
-    "launchCheck.server.section": {
+    "home.distribution.title": {
       "extractionState": "manual",
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Сервер"
+            "value": "Куда ушли деньги"
           }
         }
       }
     },
-    "launchCheck.settings.createdAt": {
+    "home.spent": {
+      "comment": "Подпись над итогом: %@ — точные даты периода («1–30 сентября»).",
       "extractionState": "manual",
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Первый запуск"
+            "value": "Потрачено · %@"
           }
         }
       }
     },
-    "launchCheck.storage.failed": {
+    "home.title": {
       "extractionState": "manual",
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Не удалось прочитать настройки"
+            "value": "Обзор"
           }
         }
       }
     },
-    "launchCheck.storage.ready": {
+    "overview.loading": {
+      "comment": "VoiceOver: первая загрузка локальных данных.",
       "extractionState": "manual",
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Хранилище готово"
+            "value": "Загружаем расходы"
           }
         }
       }
     },
-    "launchCheck.storage.section": {
+    "period.footer": {
+      "comment": "Пояснение под вариантами периода.",
       "extractionState": "manual",
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Локальные данные"
+            "value": "Под суммой — точные даты."
           }
         }
       }
     },
-    "launchCheck.title": {
+    "period.menu.accessibility": {
+      "comment": "VoiceOver: капсула выбора периода, %@ — выбранный период.",
       "extractionState": "manual",
       "localizations": {
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Проверка запуска"
+            "value": "Период: %@"
+          }
+        }
+      }
+    },
+    "period.menu.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открывает выбор периода"
+          }
+        }
+      }
+    },
+    "period.preset.currentMonth": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Текущий месяц"
+          }
+        }
+      }
+    },
+    "period.preset.days": {
+      "comment": "Скользящий период: %lld — число дней («30 дней»).",
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld день"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld дня"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld дней"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld дня"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "period.preset.previousMonth": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Прошлый месяц"
+          }
+        }
+      }
+    },
+    "period.title": {
+      "comment": "Заголовок sheet выбора периода.",
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Период"
           }
         }
       }

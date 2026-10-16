@@ -35,8 +35,10 @@ final class AppDependencies {
     }
 
     /// Сборка для запуска приложения и тестов.
+    ///
+    /// Асинхронная: в режиме UI-тестов и previews временная БД наполняется fixture.
     /// - Throws: ошибку открытия БД. Ошибка показывается пользователю с повторной попыткой.
-    static func make(mode: LaunchMode, configuration: AppConfiguration) throws -> AppDependencies {
+    static func make(mode: LaunchMode, configuration: AppConfiguration, fixture: LedgerFixture? = nil) async throws -> AppDependencies {
         let container = mode.usesPersistentStore // Выбор хранилища зависит от режима запуска.
             ? try ModelContainerFactory.makePersistent() // Приложение — пользовательская БД на диске.
             : try ModelContainerFactory.makeInMemory() // Тесты и previews — временная БД в памяти.
@@ -46,11 +48,16 @@ final class AppDependencies {
             healthService = HealthService(client: URLSessionHTTPClient(baseURL: baseURL)) // Сервис поверх общего HTTP-клиента.
         }
 
+        // Единственный актор данных поверх того же контейнера; работает на своей очереди.
+        let ledger = LedgerStore(container: container)
+        if let fixture, !mode.usesPersistentStore { // Fixture — только во временной БД тестов и previews.
+            try await fixture.seed(into: ledger, container: container, today: .today()) // Изолированные данные UI-теста.
+        }
         return AppDependencies( // Готовый набор зависимостей.
             configuration: configuration, // Конфигурация окружения.
             modelContainer: container, // Выбранный контейнер БД.
             settingsStore: AppSettingsRepository(container: container), // Репозиторий настроек поверх контейнера.
-            ledger: LedgerStore(container: container), // Единственный актор данных поверх того же контейнера.
+            ledger: ledger, // Хранилище данных.
             healthService: healthService // Сервис или nil.
         )
     }
@@ -61,4 +68,8 @@ final class AppDependencies {
     var expenseRepository: any ExpenseRepository { ledger } // Тот же актор, узкий протокол.
     /// Отметки дня для ViewModel.
     var dayMarkRepository: any DayMarkRepository { ledger } // Тот же актор, узкий протокол.
+    /// Сводки расходов для ViewModel.
+    var overviewRepository: any ExpenseOverviewProviding { ledger } // Тот же актор, узкий протокол.
+    /// Оповещения об изменении данных для ViewModel.
+    var ledgerChanges: any LedgerChangeObserving { ledger } // Тот же актор, узкий протокол.
 }

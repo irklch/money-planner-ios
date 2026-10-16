@@ -25,24 +25,25 @@ final class AppBootstrap {
     private(set) var state: State = .loading
 
     /// Операция сборки зависимостей; внедряется для previews и тестов.
-    private let makeDependencies: () throws -> AppDependencies
+    private let makeDependencies: () async throws -> AppDependencies
     /// Логгер запуска (без пользовательских данных).
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "MoneyPlanner", category: "bootstrap")
 
     /// Создаёт запуск с заданной операцией сборки зависимостей.
-    init(makeDependencies: @escaping () throws -> AppDependencies) {
+    init(makeDependencies: @escaping () async throws -> AppDependencies) {
         self.makeDependencies = makeDependencies // Сохраняем операцию сборки.
     }
 
     /// Создаёт запуск для текущего процесса: режим и конфигурация определяются автоматически.
-    convenience init(mode: LaunchMode = .detect(), configuration: AppConfiguration = .current()) {
-        self.init { try AppDependencies.make(mode: mode, configuration: configuration) } // Стандартная сборка зависимостей.
+    convenience init(mode: LaunchMode = .detect(), configuration: AppConfiguration = .current(), fixture: LedgerFixture? = .detect()) {
+        self.init { try await AppDependencies.make(mode: mode, configuration: configuration, fixture: fixture) } // Стандартная сборка зависимостей.
     }
 
     /// Открывает БД. При ошибке файл БД не удаляется и не подменяется временным хранилищем.
-    func start() {
+    func start() async {
+        state = .loading // Повторная попытка снова показывает загрузку.
         do {
-            state = .ready(try makeDependencies()) // Собираем зависимости и переходим к интерфейсу.
+            state = .ready(try await makeDependencies()) // Собираем зависимости и переходим к интерфейсу.
         } catch {
             logger.error("Persistent store failed to open: \(String(describing: type(of: error)), privacy: .public)") // Логируем только тип ошибки.
             state = .failed // Показываем экран ошибки с повторной попыткой.
