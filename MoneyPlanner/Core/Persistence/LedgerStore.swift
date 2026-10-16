@@ -15,9 +15,11 @@ import SwiftData
 ///   `rollback()` отбрасывает все изменения транзакции, ошибка пробрасывается без изменений.
 /// - Внутри транзакции нет `await`: актор выполняет её целиком, параллельные вызовы ждут.
 ///   Поэтому системные категории не создаются дважды.
-/// - Один экземпляр на контейнер создаётся в `AppDependencies`. Инициализатор при изоляции модуля
-///   по умолчанию выполняется на MainActor; методы — на исполнителе актора.
-actor LedgerStore: ModelActor, CategoryRepository, ExpenseRepository, DayMarkRepository, LedgerSummaryProviding {
+/// - Один экземпляр на контейнер создаётся в `AppDependencies`. Работа актора выполняется
+///   на собственной последовательной очереди (`unownedExecutor`), не на главном потоке.
+/// - После каждой сохранённой транзакции `changeFeed` оповещает подписчиков (экраны перечитывают данные).
+actor LedgerStore: ModelActor, CategoryRepository, ExpenseRepository, DayMarkRepository, LedgerSummaryProviding,
+    ExpenseOverviewProviding, LedgerChangeObserving {
     /// Операция сохранения контекста. В production — `ModelContext.save()`;
     /// тесты подменяют её, чтобы воспроизвести ошибку записи.
     typealias SaveOperation = @Sendable (ModelContext) throws -> Void
@@ -35,8 +37,12 @@ actor LedgerStore: ModelActor, CategoryRepository, ExpenseRepository, DayMarkRep
     private let save: SaveOperation
     /// Системные категории уже проверены и сохранены в этом хранилище.
     private var systemCategoriesReady = false
+    /// Оповещения об изменении данных.
+    nonisolated let changeFeed = LedgerChangeFeed()
+    /// Последовательная очередь, на которой выполняется вся работа актора.
+    nonisolated private let queue: DispatchSerialQueue
 
-    /// Создаёт хранилище поверх контейнера.
+    /// Создаёт хранилище поверх контейнера. Можно вызывать с любого потока, в том числе с MainActor.
     /// - Parameters:
     ///   - container: контейнер БД приложения или тестов.
     ///   - now: источник текущего момента.
@@ -48,14 +54,32 @@ actor LedgerStore: ModelActor, CategoryRepository, ExpenseRepository, DayMarkRep
         timeZone: @escaping @Sendable () -> TimeZone = LedgerStore.currentTimeZone, // Текущий пояс по умолчанию.
         save: @escaping SaveOperation = LedgerStore.contextSave // Обычное сохранение по умолчанию.
     ) {
-        // Собственный контекст актора; запись только явная.
-        let context = ModelContext(container)
-        context.autosaveEnabled = false // Автосохранение не запишет неудачную операцию позже.
-        self.modelExecutor = DefaultSerialModelExecutor(modelContext: context) // Актор выполняет всё на этом контексте.
+        // Очередь актора.
+        let queue = DispatchSerialQueue(label: "MoneyPlanner.LedgerStore", qos: .userInitiated)
+        self.queue = queue // Исполнитель актора.
+        self.modelExecutor = Self.makeExecutor(container) // Контекст актора; используется только на очереди актора.
         self.modelContainer = container // Контейнер для ModelActor.
         self.now = now // Источник времени.
         self.timeZone = timeZone // Источник часового пояса.
         self.save = save // Операция сохранения.
+    }
+
+    /// Исполнитель актора — собственная последовательная очередь.
+    ///
+    /// Стандартный исполнитель `ModelActor` (`DefaultSerialModelExecutor`) на iOS 26 выполнял
+    /// работу актора на главном потоке, даже если контекст создан вне его (проверено тестом
+    /// `storeDoesNotRunOnMainThread`). Чтение и расчёт сводок не должны блокировать MainActor,
+    /// поэтому актор выполняется на своей очереди; `ModelContext` используется только на ней.
+    nonisolated var unownedExecutor: UnownedSerialExecutor {
+        queue.asUnownedSerialExecutor() // Все методы актора — на очереди хранилища.
+    }
+
+    /// Собственный контекст актора; запись только явная.
+    nonisolated private static func makeExecutor(_ container: ModelContainer) -> any ModelExecutor {
+        // Контекст актора.
+        let context = ModelContext(container)
+        context.autosaveEnabled = false // Автосохранение не запишет неудачную операцию позже.
+        return DefaultSerialModelExecutor(modelContext: context) // Источник `modelContext` для ModelActor.
     }
 
     /// Текущий момент по системным часам.
@@ -75,6 +99,31 @@ actor LedgerStore: ModelActor, CategoryRepository, ExpenseRepository, DayMarkRep
         // Неудалённые расходы.
         let expenses = try modelContext.fetchCount(FetchDescriptor<Expense>(predicate: #Predicate { $0.deletedAt == nil }))
         return LedgerSummary(activeCategoryCount: categories, expenseCount: expenses) // Сводка.
+    }
+
+    // MARK: - ExpenseOverviewProviding
+
+    /// Сводка за период: читает только расходы периода и категории, считает итоги на исполнителе актора.
+    func overview(of period: ClosedRange<CalendarDate>, categoryID: UUID?) throws -> ExpenseOverview {
+        try ensureSystemCategories() // Системные категории распознаются как известные.
+        // Расходы периода в порядке истории.
+        let expenses = try expenses(in: period, categoryID: categoryID)
+        // Все категории, включая архивные: таблица маленькая, расходы её не дублируют.
+        let categories = try modelContext.fetch(FetchDescriptor<Category>()).compactMap(snapshot(of:))
+        return try ExpenseSummaryCalculator.summarize( // Расчёт без UI и SwiftData.
+            expenses: expenses, // Набор расходов.
+            categories: Dictionary(categories.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first }), // По UUID.
+            period: period, // Границы.
+            scopeCategoryID: categoryID, // Область.
+            earliestExpenseDate: expenses.isEmpty ? try earliestExpenseDate(categoryID: categoryID) : nil // Нужна только пустому периоду.
+        )
+    }
+
+    // MARK: - LedgerChangeObserving
+
+    /// Поток событий об изменении данных.
+    nonisolated func changes() -> AsyncStream<Void> {
+        changeFeed.changes() // Подписка на рассылку.
     }
 
     // MARK: - CategoryRepository
@@ -293,11 +342,13 @@ actor LedgerStore: ModelActor, CategoryRepository, ExpenseRepository, DayMarkRep
 
     /// Выполняет изменения и сохраняет их одним `save()`. При любой ошибке откатывает контекст
     /// и пробрасывает исходную ошибку. Тело синхронное: внутри транзакции нет `await`.
-    private func write<Value>(_ body: () throws -> Value) throws -> Value {
+    /// - Parameter notifies: оповестить подписчиков после успешной записи.
+    private func write<Value>(notifies: Bool = true, _ body: () throws -> Value) throws -> Value {
         do { // Транзакция.
             // Результат операции до сохранения.
             let result = try body()
             try save(modelContext) // Явная запись.
+            if notifies { changeFeed.notify() } // Экраны перечитают данные.
             return result // Результат после успешного сохранения.
         } catch { // Любая ошибка: проверки или сохранения.
             modelContext.rollback() // Ни одна часть операции не остаётся в контексте.
@@ -309,7 +360,7 @@ actor LedgerStore: ModelActor, CategoryRepository, ExpenseRepository, DayMarkRep
     /// архивирование не сбрасывается, дубликаты не создаются.
     private func ensureSystemCategories() throws {
         guard !systemCategoriesReady else { return } // Уже проверено в этом хранилище.
-        try write { // Одна транзакция на весь набор.
+        try write(notifies: false) { // Одна транзакция на весь набор; видимых данных не меняет.
             // UUID системных категорий из реестра.
             let registryIDs = SystemCategory.allCases.map(\.id)
             // UUID системных категорий, которые уже есть локально.
@@ -437,6 +488,17 @@ actor LedgerStore: ModelActor, CategoryRepository, ExpenseRepository, DayMarkRep
         var descriptor = FetchDescriptor<Expense>(predicate: #Predicate { $0.id == id && $0.deletedAt == nil })
         descriptor.fetchLimit = 1 // Нужна одна запись.
         return try modelContext.fetch(descriptor).first // Расход или nil.
+    }
+
+    /// Самая ранняя дата неудалённого расхода (одной категории или всех); `nil`, если расходов нет.
+    private func earliestExpenseDate(categoryID: UUID?) throws -> CalendarDate? {
+        // Запрос одного расхода с минимальной датой.
+        var descriptor = categoryID.map { id in
+            FetchDescriptor<Expense>(predicate: #Predicate { $0.deletedAt == nil && $0.categoryID == id }) // Одна категория.
+        } ?? FetchDescriptor<Expense>(predicate: #Predicate { $0.deletedAt == nil }) // Все категории.
+        descriptor.sortBy = [SortDescriptor(\.dateKey)] // По возрастанию даты.
+        descriptor.fetchLimit = 1 // Нужна одна запись.
+        return try modelContext.fetch(descriptor).first.map { try CalendarDate(storageKey: $0.dateKey) } // Дата или nil.
     }
 
     /// Число неудалённых расходов на дату.

@@ -9,6 +9,7 @@ import SwiftUI
 /// Строковые имена символов живут только здесь. Экран выбирает иконку по смыслу:
 /// `AppIcon.retry.image`, `Label(…, systemImage: AppIcon.retry.systemName)`.
 /// Растровые и векторные изображения добавляются в Asset Catalog и используются через `ImageResource`.
+/// Категории SF Symbols не используют: их идентичность — эмодзи (Figma, Category identity).
 enum AppIcon: String, CaseIterable {
     /// Повторить действие.
     case retry = "arrow.clockwise"
@@ -16,16 +17,16 @@ enum AppIcon: String, CaseIterable {
     case error = "exclamationmark.triangle"
     /// Нет соединения с сетью.
     case noConnection = "wifi.slash"
-    /// Локальное хранилище данных.
-    case storage = "internaldrive"
-    /// Сервер.
-    case server = "server.rack"
-    /// Успешное состояние.
-    case success = "checkmark.circle.fill"
-    /// Неудачное состояние.
-    case failure = "xmark.octagon.fill"
-    /// Функция не настроена.
-    case notConfigured = "slash.circle"
+    /// Переход в строке списка.
+    case disclosure = "chevron.right"
+    /// Открывает выбор из вариантов (капсула периода).
+    case selector = "chevron.up.chevron.down"
+    /// Выбранный вариант.
+    case checkmark = "checkmark"
+    /// Календарь: пустой период.
+    case calendar = "calendar"
+    /// Категория, которой нет на устройстве.
+    case unknownCategory = "questionmark"
 
     /// Имя символа SF Symbols для API, которые принимают строку (`Label(systemImage:)`).
     var systemName: String { rawValue } // Имя символа хранится как rawValue кейса.

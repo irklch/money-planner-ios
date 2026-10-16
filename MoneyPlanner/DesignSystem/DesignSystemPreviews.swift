@@ -12,10 +12,14 @@ private struct ColorTokensPreview: View {
     /// Пары «имя токена — цвет» для отображения.
     private let tokens: [(String, Color)] = [
         ("background", AppColor.background), // Фон экрана.
+        ("backgroundSecondary", AppColor.backgroundSecondary), // Подложка эмодзи в истории.
         ("surface", AppColor.surface), // Фон поверхностей.
+        ("surfaceSecondary", AppColor.surfaceSecondary), // Мягкая нейтральная подложка.
         ("textPrimary", AppColor.textPrimary), // Основной текст.
         ("textSecondary", AppColor.textSecondary), // Вторичный текст.
+        ("textTertiary", AppColor.textTertiary), // Третичный текст.
         ("accent", AppColor.accent), // Акцент.
+        ("accentGlow", AppColor.accentGlow), // Свечение фона.
         ("separator", AppColor.separator), // Разделитель.
         ("error", AppColor.error), // Ошибка.
         ("success", AppColor.success), // Успех.
@@ -47,6 +51,10 @@ private struct ColorTokensPreview: View {
                                 Text(verbatim: "\(index)").textStyle(.caption) // Индекс палитры.
                             }
                     }
+                    RoundedRectangle(cornerRadius: AppRadius.small) // Образец цвета неизвестной категории.
+                        .fill(CategoryPalette.unknown) // Нейтральный цвет.
+                        .frame(height: AppSize.minimumTapTarget) // Высота образца 44 pt.
+                        .overlay { Text(verbatim: "?").textStyle(.caption) } // Подпись образца.
                 }
             } header: {
                 Text(verbatim: "CategoryPalette") // Заголовок секции.
@@ -63,11 +71,18 @@ private struct TypographyPreview: View {
     var body: some View {
         ScrollView { // Прокрутка для крупного Dynamic Type.
             VStack(alignment: .leading, spacing: AppSpacing.medium) { // Роли текста друг под другом.
+                Text(verbatim: "124 580 ₽").heroAmountStyle() // Итоговая сумма периода.
                 Text(verbatim: "screenTitle").textStyle(.screenTitle) // Заголовок экрана.
+                Text(verbatim: "title").textStyle(.title) // Заголовок экрана категории.
+                Text(verbatim: "stateTitle").textStyle(.stateTitle) // Заголовок пустого состояния.
                 Text(verbatim: "sectionTitle").textStyle(.sectionTitle) // Заголовок секции.
+                Text(verbatim: "headline").textStyle(.headline) // Заголовок sheet.
                 Text(verbatim: "body — основной текст, который переносится на несколько строк при крупном шрифте") // Длинный текст для проверки переноса.
                     .textStyle(.body) // Роль основного текста.
+                Text(verbatim: "subheadline").textStyle(.subheadline) // Пояснение.
+                Text(verbatim: "subheadlineEmphasized").textStyle(.subheadlineEmphasized) // Капсула периода.
                 Text(verbatim: "caption").textStyle(.caption) // Подпись.
+                Text(verbatim: "captionEmphasized").textStyle(.captionEmphasized) // Заголовок дня.
                 Text(Decimal(string: "1250.50") ?? 0, format: .currency(code: "RUB")).textStyle(.amount) // Сумма в рублях с учётом локали.
                 Text(Date.now, format: .dateTime.day().month(.wide).year()).textStyle(.body) // Дата с учётом локали.
                 Text(verbatim: "button").textStyle(.button) // Текст кнопки.
@@ -104,8 +119,10 @@ private struct MetricsAndIconsPreview: View {
             }
             Section { // Секция шкалы отступов.
                 ForEach([ // Пары «имя — значение» шкалы.
-                    ("xxSmall", AppSpacing.xxSmall), ("xSmall", AppSpacing.xSmall), ("small", AppSpacing.small), // Малые отступы.
-                    ("medium", AppSpacing.medium), ("large", AppSpacing.large), ("xLarge", AppSpacing.xLarge), // Средние и крупные отступы.
+                    ("tiny", AppSpacing.tiny), ("xxSmall", AppSpacing.xxSmall), ("compact", AppSpacing.compact), // Минимальные отступы.
+                    ("xSmall", AppSpacing.xSmall), ("snug", AppSpacing.snug), ("small", AppSpacing.small), ("cozy", AppSpacing.cozy), // Малые отступы.
+                    ("medium", AppSpacing.medium), ("mediumLarge", AppSpacing.mediumLarge), ("large", AppSpacing.large), // Средние отступы.
+                    ("section", AppSpacing.section), ("xLarge", AppSpacing.xLarge), ("xxLarge", AppSpacing.xxLarge), // Крупные отступы.
                 ], id: \.0) { name, value in // Строка на каждый токен.
                     HStack { // Полоса и подпись рядом.
                         Rectangle().fill(AppColor.accent).frame(width: value, height: AppSpacing.medium) // Полоса шириной в значение отступа.

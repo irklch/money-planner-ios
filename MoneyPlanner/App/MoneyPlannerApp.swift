@@ -41,7 +41,7 @@ struct AppLaunchView: View {
                     icon: .error, // Иконка ошибки.
                     title: .errorStorageTitle, // «Не удалось открыть данные».
                     message: .errorStorageMessage, // Пояснение и подсказка.
-                    retry: bootstrap.start // «Повторить» заново открывает БД.
+                    retry: { Task { await bootstrap.start() } } // «Повторить» заново открывает БД.
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity) // Компонент на весь экран.
                 .background(AppColor.background) // Фон экрана из дизайн-системы.
@@ -49,7 +49,7 @@ struct AppLaunchView: View {
         }
         .task { // Запуск при первом появлении экрана.
             if case .loading = bootstrap.state { // Открываем БД только один раз.
-                bootstrap.start() // Открытие БД и сборка зависимостей.
+                await bootstrap.start() // Открытие БД и сборка зависимостей.
             }
         }
     }

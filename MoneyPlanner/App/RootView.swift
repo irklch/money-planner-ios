@@ -4,74 +4,100 @@
 // SwiftUI нужен для View и NavigationStack.
 import SwiftUI
 
-/// Маршруты нативной навигации. Экраны добавляются сюда по мере появления фич.
-enum AppRoute: Hashable {}
+/// Маршруты нативной навигации.
+enum AppRoute: Hashable {
+    /// Расходы категории за выбранный период.
+    case category(CategoryReference)
+}
 
-/// Корневой экран: `NavigationStack` с путём навигации и временным экраном проверки запуска.
+/// Корневой экран: `NavigationStack` с главным экраном «Обзор» и общим выбранным периодом.
 struct RootView: View {
     /// Зависимости приложения из корня композиции.
     let dependencies: AppDependencies
 
-    /// Путь навигации; сюда будут добавляться маршруты экранов.
+    /// Путь навигации.
     @State private var path: [AppRoute] = []
-    /// ViewModel временного экрана проверки запуска; живёт вместе с RootView.
-    @State private var launchCheckModel: LaunchCheckViewModel
+    /// Общий выбранный период; живёт, пока работает приложение, между запусками не сохраняется.
+    @State private var periodSelection: PeriodSelection
+    /// ViewModel главного экрана; живёт вместе с RootView, поэтому период и данные не сбрасываются при возврате.
+    @State private var homeModel: ExpenseOverviewModel
 
-    /// Создаёт корневой экран и ViewModel первого экрана из зависимостей.
+    /// Создаёт корневой экран и ViewModel главного экрана из зависимостей.
     init(dependencies: AppDependencies) {
         self.dependencies = dependencies // Сохраняем зависимости.
-        _launchCheckModel = State(initialValue: LaunchCheckViewModel( // ViewModel создаётся один раз.
-            configuration: dependencies.configuration, // Версия приложения для подписи.
-            settingsStore: dependencies.settingsStore, // Хранилище настроек.
-            ledgerSummary: dependencies.ledger, // Сводка локального хранилища.
-            healthService: dependencies.healthService // Сервис health-check или nil.
+        // Общий период для всех экранов.
+        let selection = PeriodSelection()
+        _periodSelection = State(initialValue: selection) // Период создаётся один раз.
+        _homeModel = State(initialValue: ExpenseOverviewModel( // ViewModel создаётся один раз.
+            selection: selection, // Общий период.
+            repository: dependencies.overviewRepository, // Сводки из локальной БД.
+            changes: dependencies.ledgerChanges // Оповещения об изменениях.
         ))
     }
 
     /// Содержимое корневого экрана.
     var body: some View {
         NavigationStack(path: $path) { // Нативный стек навигации с управляемым путём.
-            // С первым маршрутом здесь появится
-            // `.navigationDestination(for: AppRoute.self) { route in switch route { … } }`.
-            LaunchCheckView(model: launchCheckModel) // Временный экран проверки запуска.
+            HomeView(model: homeModel, selection: periodSelection) { path.append(.category($0)) } // Главный экран.
+                .navigationDestination(for: AppRoute.self) { route in // Экраны стека.
+                    switch route { // Экран по маршруту.
+                    case .category(let category): // Расходы категории.
+                        CategoryExpensesView( // Тот же период и слой данных.
+                            category: category, // Категория из строки.
+                            selection: periodSelection, // Общий период.
+                            repository: dependencies.overviewRepository, // Сводки.
+                            changes: dependencies.ledgerChanges // Оповещения.
+                        )
+                    }
+                }
         }
+        .tint(AppColor.accent) // Акцент для системных элементов.
         .accessibilityIdentifier("root") // Идентификатор для UI-тестов.
     }
 }
 
-/// Preview корневого экрана при обычном размере текста.
+/// Preview главного экрана с демонстрационными расходами.
 #Preview("RootView") {
-    RootView(dependencies: .preview()) // Зависимости без сети и с временной БД.
+    PreviewRoot(fixture: .filled) // Полный набор данных.
 }
 
-/// Preview корневого экрана при крупном размере текста.
+/// Preview главного экрана при крупном размере текста.
 #Preview("RootView, AX3") {
-    RootView(dependencies: .preview()) // Зависимости без сети и с временной БД.
+    PreviewRoot(fixture: .filled) // Полный набор данных.
         .environment(\.dynamicTypeSize, .accessibility3) // Крупный Dynamic Type.
 }
 
-/// Зависимости для previews.
-extension AppDependencies {
-    /// Зависимости для previews: временная БД и сервис без сети.
-    static func preview(health: Result<ServerHealth, NetworkError> = .success(.available)) -> AppDependencies {
-        let container = try! ModelContainerFactory.makeInMemory() // В previews ошибка БД в памяти невозможна на практике.
-        return AppDependencies( // Набор зависимостей для preview.
-            configuration: AppConfiguration(apiBaseURL: nil, appVersion: "1.0", buildNumber: "1"), // Без адреса API.
-            modelContainer: container, // Временная БД.
-            settingsStore: AppSettingsRepository(container: container), // Репозиторий поверх временной БД.
-            ledger: LedgerStore(container: container), // Хранилище данных поверх временной БД.
-            healthService: PreviewHealthService(result: health) // Сервис с заранее заданным ответом.
-        )
+/// Preview пустого текущего месяца.
+#Preview("RootView, пустой месяц") {
+    PreviewRoot(fixture: .previousMonthOnly) // Расходы только за прошлый месяц.
+}
+
+/// Preview без данных.
+#Preview("RootView, без данных") {
+    PreviewRoot(fixture: nil) // Пустая БД.
+}
+
+/// Корневой экран previews: временная БД, наполненная fixture.
+private struct PreviewRoot: View {
+    /// Набор данных; `nil` — пустая БД.
+    let fixture: LedgerFixture?
+
+    /// Зависимости после наполнения БД.
+    @State private var dependencies: AppDependencies?
+
+    /// RootView после подготовки данных.
+    var body: some View {
+        Group { // Подготовка или экран.
+            if let dependencies { RootView(dependencies: dependencies) } else { ProgressView() } // Экран или индикатор.
+        }
+        .task { // Подготовка данных один раз.
+            dependencies = try? await AppDependencies.make(mode: .preview, configuration: .preview, fixture: fixture) // Временная БД без сети.
+        }
     }
 }
 
-/// Сервис health-check для previews: отвечает заданным результатом без сети.
-nonisolated struct PreviewHealthService: HealthServicing {
-    /// Результат, который вернёт сервис.
-    let result: Result<ServerHealth, NetworkError>
-
-    /// Возвращает заданный результат или ошибку.
-    func fetchHealth() async throws -> ServerHealth {
-        try result.get() // Значение или ошибка из result.
-    }
+/// Зависимости для previews.
+extension AppConfiguration {
+    /// Конфигурация previews: без адреса API.
+    static let preview = AppConfiguration(apiBaseURL: nil, appVersion: "1.0", buildNumber: "1")
 }
